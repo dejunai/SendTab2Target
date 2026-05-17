@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Open in Target",
+  "version": "1.0",
+  "description": "Send current tab to browser",
+  "permissions": ["contextMenus", "nativeMessaging", "tabs", "storage"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  }
+}

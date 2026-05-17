@@ -1,0 +1,9 @@
+{
+  "name": "com.browser.bridge",
+  "description": "Browser Bridge Native Messaging Host",
+  "path": "C:\\Users\\dejunai\\AppData\\Local\\Vivaldi\\Application\\SendToApp\\app\\host\\bridge.bat",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://hnioifoaakmkkgnfcdbphokggkbficpl/"
+  ]
+}
