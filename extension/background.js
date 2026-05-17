@@ -10,14 +10,39 @@ const ROOT_ID = 'open-in-external-root';
 const DEFAULT_ID = 'open-in-external-default';
 const MANAGE_ID = 'open-in-external-manage';
 
-function sendNative(url, browser) {
-  chrome.runtime.sendNativeMessage("com.browser.bridge", { url, browser }, (response) => {
-    if (chrome.runtime.lastError) {
-      console.error("Native Messaging Error:", chrome.runtime.lastError.message);
-    } else if (response && response.status === "error") {
+let nativePort = null;
+
+function connectHost() {
+  if (nativePort) return;
+  nativePort = chrome.runtime.connectNative("com.browser.bridge");
+  nativePort.onMessage.addListener((response) => {
+    if (response && response.status === "error") {
       console.error("Bridge error:", response.error);
     }
   });
+  nativePort.onDisconnect.addListener(() => {
+    console.log("Native host disconnected:", chrome.runtime.lastError);
+    nativePort = null;
+    // Automatically reconnect to keep the service worker and host alive
+    setTimeout(connectHost, 5000);
+  });
+}
+
+// Establish the persistent connection immediately
+connectHost();
+
+function sendNative(url, browser) {
+  if (!nativePort) {
+    connectHost();
+  }
+  try {
+    nativePort.postMessage({ url, browser });
+  } catch (e) {
+    console.error("Failed to post message, falling back:", e);
+    chrome.runtime.sendNativeMessage("com.browser.bridge", { url, browser }, (response) => {
+      if (chrome.runtime.lastError) console.error("Native Messaging Error:", chrome.runtime.lastError.message);
+    });
+  }
 }
 
 function buildContextMenus() {
