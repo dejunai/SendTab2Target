@@ -27,24 +27,26 @@ def main():
 
             # Normalize browser path and try to launch the URL with it when possible.
             if sys.platform == "darwin":
-                if browser and os.path.exists(browser):
+                if browser:
+                    # 'open -a' handles both app names and absolute paths on macOS
                     subprocess.Popen(['open', '-a', browser, url])
                 else:
                     subprocess.Popen(['open', url])
             elif sys.platform == "win32":
-                # If a browser executable was provided and exists, run it directly.
-                if browser and os.path.exists(browser):
+                if browser:
                     try:
+                        # Try direct execution first
                         subprocess.Popen([browser, url], shell=False)
                     except Exception:
-                        # Fallback to start (which uses registered handlers)
-                        subprocess.Popen(['cmd', '/c', 'start', '', url], shell=True)
+                        # Fallback for Windows Store Apps (Execution Aliases) or .bat files
+                        # We use 'start' but explicitly pass the browser so we don't lose the user's choice
+                        subprocess.Popen(['cmd', '/c', 'start', '', browser, url], shell=True)
                 else:
                     # Let Windows open using default handler
                     os.startfile(url)
             else:
-                # On Linux/other, prefer a provided browser executable, else xdg-open
-                if browser and shutil.which(browser):
+                # On Linux/other
+                if browser:
                     subprocess.Popen([browser, url])
                 else:
                     subprocess.Popen(['xdg-open', url])
